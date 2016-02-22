@@ -26,7 +26,10 @@ port tasks =
 --
 -- My type declarations
 --
-type alias Model = Int
+type alias Model =
+  { frequency: Int
+  , soundSpeed: Float
+  }
 
 type Action
   = NoOp
@@ -36,11 +39,11 @@ type Action
 -- My functions
 --
 init : (Model, Effects Action)
-init = (1000, Effects.none)
+init = ({ frequency = 1000, soundSpeed = 345.41 }, Effects.none)
 
-freqToWavelength : Int -> Float
-freqToWavelength freq =
-  345.41 / (toFloat freq)
+freqToWavelength : Model -> Float
+freqToWavelength model =
+  model.soundSpeed / (toFloat model.frequency)
 
 update : Action -> Model -> (Model, Effects Action)
 update action model =
@@ -51,7 +54,7 @@ update action model =
           intResult = String.toInt(freqString)
       in
          case intResult of
-           Ok value -> (value, Effects.none)
+           Ok value -> ({ model | frequency = value }, Effects.none)
            Err msg -> (model, Effects.none)
 
 onInput : Signal.Address a -> (String -> a) -> Attribute
@@ -62,6 +65,6 @@ view : Address Action -> Model -> Html
 view address model =
   div []
     [ label [ (for "freq") ] [ text "Frequency" ]
-    , input [ (id "freq"), (value (toString model)), onInput address FreqUpdate ] []
+    , input [ (id "freq"), (value (toString model.frequency)), onInput address FreqUpdate ] []
     , div [] [ text (toString (freqToWavelength model)) ]
     ]
